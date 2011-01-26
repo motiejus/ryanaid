@@ -1,0 +1,19 @@
+#!/bin/sh
+lockfile -l 10 next_dest.lock
+
+if [ "$#" = "1" ]; then
+	sed -i "1i ${1}" next_dest.txt
+else
+	ret="$(head -1 next_dest.txt)"
+	[[ -z "$ret" ]] && ret="$(head -1 dests.txt)"
+
+	TMP="$(grep -v "$ret" < next_dest.txt)"
+
+	if [ -z "$TMP" ]; then # Add another item to next_dest.txt from dests
+		echo "$(grep -A1 "$ret" < dests.txt | grep -v "$ret" )" > next_dest.txt
+	else
+		echo "$TMP" > next_dest.txt
+	fi
+	echo $ret
+fi
+rm -f next_dest.lock
